@@ -1,0 +1,82 @@
+/* Full screen center with gradient background */
+.center {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Card container */
+.center > div {
+  background: #ffffff;
+  padding: 40px;
+  border-radius: 12px;
+  width: 350px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Heading */
+.center h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  color: #333;
+}
+
+/* Error message */
+.center p {
+  text-align: center;
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+/* Input fields */
+.center input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  transition: 0.3s ease;
+}
+
+.center input:focus {
+  border-color: #667eea;
+  outline: none;
+  box-shadow: 0 0 5px rgba(102, 126, 234, 0.5);
+}
+
+/* Button */
+.center button {
+  width: 100%;
+  padding: 12px;
+  background: #667eea;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.center button:hover {
+  background: #5a67d8;
+}
+
+/* Register link */
+.link-text {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.link-text span {
+  color: #667eea;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.link-text span:hover {
+  text-decoration: underline;
+}
