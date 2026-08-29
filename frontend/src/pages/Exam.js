@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useRef } from "react";
+import { API_BASE_URL } from "../config";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import axios from "axios";
 import Timer from "../components/Timer";
 import { useNavigate, useParams } from "react-router-dom";
@@ -39,7 +40,7 @@ export default function Exam() {
     }
 
     axios
-      .get(`http://localhost:22020/api/exam/start/${user._id}/${subject}`)
+      .get(`${API_BASE_URL}/api/exam/start/${user._id}/${subject}`)
       .then((res) => {
         const data = Array.isArray(res.data) ? res.data : [];
 
@@ -66,9 +67,36 @@ export default function Exam() {
   }, [subject, user?._id]);
 
   // ==========================
+  // Submit Exam
+  // ==========================
+  const submit = useCallback(async () => {
+    if (hasSubmitted.current) return;
+    hasSubmitted.current = true;
+
+    try {
+      setSubmitted(true);
+
+      const res = await axios.post(
+        `${API_BASE_URL}/api/exam/submit`,
+        {
+          answers,
+          userId: user._id,
+          subject,
+        }
+      );
+
+      navigate("/test-submitted", { state: res.data });
+    } catch (err) {
+      alert(err.response?.data?.message || "Submission failed");
+      hasSubmitted.current = false;
+      setSubmitted(false);
+    }
+  }, [answers, user?._id, subject, navigate]);
+
+  // ==========================
   // Violation Handler
   // ==========================
-  const handleViolation = (message) => {
+  const handleViolation = useCallback((message) => {
     if (submitted) return;
 
     setViolations((prev) => {
@@ -83,7 +111,7 @@ export default function Exam() {
 
       return newCount;
     });
-  };
+  }, [submitted, submit]);
 
   // ==========================
   // Tab Switch Detection
@@ -111,7 +139,7 @@ export default function Exam() {
         handleVisibilityChange
       );
     };
-  }, [submitted]);
+  }, [submitted, handleViolation]);
 
   // ==========================
   // Option Select
@@ -123,33 +151,6 @@ export default function Exam() {
       ...prev,
       [key]: option,
     }));
-  };
-
-  // ==========================
-  // Submit Exam
-  // ==========================
-  const submit = async () => {
-    if (hasSubmitted.current) return;
-    hasSubmitted.current = true;
-
-    try {
-      setSubmitted(true);
-
-      const res = await axios.post(
-        "http://localhost:22020/api/exam/submit",
-        {
-          answers,
-          userId: user._id,
-          subject,
-        }
-      );
-
-      navigate("/test-submitted", { state: res.data });
-    } catch (err) {
-      alert(err.response?.data?.message || "Submission failed");
-      hasSubmitted.current = false;
-      setSubmitted(false);
-    }
   };
 
   const getExamTime = () => {

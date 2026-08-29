@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../config";
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -29,7 +30,7 @@ export default function Login() {
 
       // Authenticate via backend API
       const res = await axios.post(
-        "http://localhost:22020/api/auth/login",
+        `${API_BASE_URL}/api/auth/login`,
         data
       );
 

@@ -1,8 +1,9 @@
+require("dotenv").config();
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const User = require("./models/User");
 
-mongoose.connect("mongodb://127.0.0.1:27017/examdb")
+mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log("DB connected"))
   .catch(err => console.error(err));
 

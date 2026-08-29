@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../config";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -64,9 +65,9 @@ export default function AdminDashboard() {
       setLoading(true);
       const config = { timeout: 5000 };
 
-      const resStudents = await axios.get("http://localhost:22020/api/admin/student-results", config);
-      const resSubjects = await axios.get("http://localhost:22020/api/admin/subjects", config);
-      const resQuestions = await axios.get("http://localhost:22020/api/admin/all", config);
+      const resStudents = await axios.get(`${API_BASE_URL}/api/admin/student-results`, config);
+      const resSubjects = await axios.get(`${API_BASE_URL}/api/admin/subjects`, config);
+      const resQuestions = await axios.get(`${API_BASE_URL}/api/admin/all`, config);
 
       setStudents(resStudents.data);
       setSubjects(resSubjects.data);
@@ -135,7 +136,7 @@ export default function AdminDashboard() {
         answer: answer.trim()
       };
 
-      await axios.post("http://localhost:22020/api/admin/add", payload);
+      await axios.post(`${API_BASE_URL}/api/admin/add`, payload);
       alert(`Question Added Successfully to ${subject}! Exam time limit extended by +10 seconds.`);
 
       // Clear/Reset Form (keep current subject unless typed)

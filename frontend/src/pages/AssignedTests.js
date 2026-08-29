@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import { API_BASE_URL } from "../config";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -9,23 +10,23 @@ export default function AssignedTests({ userEmail }) {
   // Using a state for current time to force re-renders and check time window
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  useEffect(() => {
-    if (userEmail) loadTests();
-    const timer = setInterval(() => setCurrentTime(new Date()), 10000); // update every 10s
-    return () => clearInterval(timer);
-  }, [userEmail]);
-
-  const loadTests = async () => {
+  const loadTests = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`http://localhost:22020/api/special-tests/student/${userEmail}`);
+      const res = await axios.get(`${API_BASE_URL}/api/special-tests/student/${userEmail}`);
       setTests(res.data);
       setLoading(false);
     } catch (err) {
       console.error("Error loading assigned tests", err);
       setLoading(false);
     }
-  };
+  }, [userEmail]);
+
+  useEffect(() => {
+    if (userEmail) loadTests();
+    const timer = setInterval(() => setCurrentTime(new Date()), 10000); // update every 10s
+    return () => clearInterval(timer);
+  }, [userEmail, loadTests]);
 
   const checkStatus = (scheduledTime) => {
     const scheduled = new Date(scheduledTime);

@@ -1,7 +1,8 @@
+require("dotenv").config();
 const mongoose = require("mongoose");
 const Question = require("./models/Question");
 
-mongoose.connect("mongodb://127.0.0.1:27017/examdb") // Connect to correct DB
+mongoose.connect(process.env.MONGODB_URI) // Connect to correct DB
   .then(() => console.log("DB connected"))
   .catch(err => console.error(err));
 

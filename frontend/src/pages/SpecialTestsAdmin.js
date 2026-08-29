@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../config";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
@@ -28,7 +29,7 @@ export default function SpecialTestsAdmin({ onViewReport }) {
 
   const loadStudents = async () => {
     try {
-      const res = await axios.get("http://localhost:22020/api/admin/student-results");
+      const res = await axios.get(`${API_BASE_URL}/api/admin/student-results`);
       // Filter out any student account that has "admin" in its name or email
       const studentsOnly = res.data.filter(user => 
         user.role !== "admin" && 
@@ -44,7 +45,7 @@ export default function SpecialTestsAdmin({ onViewReport }) {
   const loadTests = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:22020/api/special-tests");
+      const res = await axios.get(`${API_BASE_URL}/api/special-tests`);
       setTests(res.data);
       setLoading(false);
     } catch (err) {
@@ -94,7 +95,7 @@ export default function SpecialTestsAdmin({ onViewReport }) {
     const assignedStudents = selectedStudents;
 
     try {
-      await axios.post("http://localhost:22020/api/special-tests", {
+      await axios.post(`${API_BASE_URL}/api/special-tests`, {
         name,
         scheduledTime,
         durationMinutes: 30, // Hardcoded or add a field

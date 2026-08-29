@@ -1,27 +1,28 @@
-import React, { useState, useEffect } from "react";
+import { API_BASE_URL } from "../config";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 
 export default function SpecialTestReport({ testId }) {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (testId) {
-      loadResults();
-    }
-  }, [testId]);
-
-  const loadResults = async () => {
+  const loadResults = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`http://localhost:22020/api/special-tests/${testId}/results`);
+      const res = await axios.get(`${API_BASE_URL}/api/special-tests/${testId}/results`);
       setResults(res.data);
       setLoading(false);
     } catch (err) {
       console.error("Error loading special test results", err);
       setLoading(false);
     }
-  };
+  }, [testId]);
+
+  useEffect(() => {
+    if (testId) {
+      loadResults();
+    }
+  }, [testId, loadResults]);
 
   const formatTime = (seconds) => {
     const m = Math.floor(seconds / 60);

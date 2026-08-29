@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../config";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -20,7 +21,7 @@ export default function Python() {
 
   const submit = async () => {
     try {
-      const res = await axios.post("http://localhost:22020/api/exam/submit", {
+      const res = await axios.post(`${API_BASE_URL}/api/exam/submit`, {
         userId: user._id,
         subject: "Python",
         answers
