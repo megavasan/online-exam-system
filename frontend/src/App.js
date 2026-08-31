@@ -3,11 +3,9 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Exam from "./pages/Exam";
+import SpecialExam from "./pages/SpecialExam";
 import Result from "./pages/Result";
 import AdminDashboard from "./pages/AdminDashboard";
-import TakeSpecialTest from "./pages/TakeSpecialTest";
-import TestSubmitted from "./pages/TestSubmitted";
-import { ThemeProvider } from "./context/ThemeContext";
 
 // ✅ PrivateRoute Component
 function PrivateRoute({ children }) {
@@ -17,8 +15,7 @@ function PrivateRoute({ children }) {
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <BrowserRouter>
+    <BrowserRouter>
       <Routes>
         <Route path="/register" element={<Register />} />
         <Route path="/" element={<Login />} />
@@ -39,10 +36,10 @@ export default function App() {
           }
         />
         <Route
-          path="/special-exam/:id"
+          path="/special-exam/:testId"
           element={
             <PrivateRoute>
-              <TakeSpecialTest />
+              <SpecialExam />
             </PrivateRoute>
           }
         />
@@ -61,16 +58,7 @@ export default function App() {
         <Route path="/view-questions" element={<Navigate to="/admin" replace />} />
         {/* 404 Fallback */}
         <Route path="*" element={<h1>404 - Page Not Found</h1>} />
-        <Route
-          path="/test-submitted"
-          element={
-            <PrivateRoute>
-              <TestSubmitted />
-            </PrivateRoute>
-          }
-        />
       </Routes>
-      </BrowserRouter>
-    </ThemeProvider>
+    </BrowserRouter>
   );
 }

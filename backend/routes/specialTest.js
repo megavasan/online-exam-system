@@ -172,4 +172,19 @@ router.post("/:id/submit", async (req, res) => {
   }
 });
 
+// =======================================
+// ✅ GET SUBMITTED RESULTS FOR A STUDENT
+// GET /api/special-tests/results/student/:email
+// =======================================
+router.get("/results/student/:email", async (req, res) => {
+  try {
+    const { email } = req.params;
+    const results = await SpecialResult.find({ userEmail: email });
+    res.status(200).json(results);
+  } catch (err) {
+    console.error("Get Student Special Results Error:", err);
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
 module.exports = router;

@@ -4,7 +4,8 @@ import Timer from "../components/Timer";
 import { useNavigate, useParams } from "react-router-dom";
 import { API_BASE_URL } from "../config";
 
-export default function Exam() {
+export default function SpecialExam() {
+  const [testDetails, setTestDetails] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
   const [loadingError, setLoadingError] = useState("");
@@ -16,21 +17,13 @@ export default function Exam() {
   const [warningMessage, setWarningMessage] = useState("");
 
   const navigate = useNavigate();
-  const { subject } = useParams();
+  const { testId } = useParams();
   const user = JSON.parse(localStorage.getItem("user"));
 
   const hasSubmitted = useRef(false);
   const questionRefs = useRef([]);
   const lastViolationTime = useRef(0);
-
-  const enterFullscreen = () => {
-    const elem = document.documentElement;
-    if (elem.requestFullscreen) {
-      elem.requestFullscreen().catch((err) => {
-        console.error("Error attempting to enable full-screen mode:", err.message);
-      });
-    }
-  };
+  const startTimeRef = useRef(0);
 
   // ==========================
   // Redirect if not logged in
@@ -42,44 +35,55 @@ export default function Exam() {
   }, [user, navigate]);
 
   // ==========================
-  // Fetch Questions
+  // Fetch Special Test Questions
   // ==========================
   useEffect(() => {
-    if (!user?._id || !subject) {
-      setLoadingError("Invalid user or subject");
+    if (!user?._id || !testId || !user?.email) {
+      setLoadingError("Invalid user or test configuration");
       setLoading(false);
       return;
     }
 
     axios
-      .get(`${API_BASE_URL}/api/exam/start/${user._id}/${subject}`)
+      .get(`${API_BASE_URL}/api/special-tests/${testId}/start/${user.email}`)
       .then((res) => {
-        const data = Array.isArray(res.data) ? res.data : [];
+        const testData = res.data;
+        const qList = Array.isArray(testData.questions) ? testData.questions : [];
 
-        if (!data.length) {
-          setLoadingError("No questions found");
+        if (!qList.length) {
+          setLoadingError("No questions found for this special test");
         } else {
-          setQuestions(data);
+          setTestDetails(testData);
+          setQuestions(qList);
 
           const initialAnswers = {};
-          data.forEach((q) => {
-            initialAnswers[q._id.toString()] = null;
+          qList.forEach((q, idx) => {
+            const key = q._id ? q._id.toString() : idx.toString();
+            initialAnswers[key] = null;
           });
           setAnswers(initialAnswers);
         }
-
         setLoading(false);
       })
       .catch((err) => {
         setLoadingError(
-          err.response?.data?.message || "Failed to load questions"
+          err.response?.data?.message || "Failed to load special test questions"
         );
         setLoading(false);
       });
-  }, [subject, user?._id]);
+  }, [testId, user?._id, user?.email]);
+
+  const enterFullscreen = () => {
+    const elem = document.documentElement;
+    if (elem.requestFullscreen) {
+      elem.requestFullscreen().catch((err) => {
+        console.error("Error attempting to enable full-screen mode:", err.message);
+      });
+    }
+  };
 
   // ==========================
-  // Submit Exam
+  // Submit Special Exam
   // ==========================
   const submit = useCallback(async () => {
     if (hasSubmitted.current) return;
@@ -87,24 +91,32 @@ export default function Exam() {
 
     try {
       setSubmitted(true);
+      const timeTakenSeconds = startTimeRef.current 
+        ? Math.floor((Date.now() - startTimeRef.current) / 1000) 
+        : 0;
 
       const res = await axios.post(
-        `${API_BASE_URL}/api/exam/submit`,
+        `${API_BASE_URL}/api/special-tests/${testId}/submit`,
         {
+          userEmail: user.email,
           answers,
-          userId: user._id,
-          subject,
+          timeTaken: timeTakenSeconds
         }
       );
 
-      alert("Exam Submitted Successfully!");
+      // Clean up fullscreen mode when submitted
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(err => console.log("Exit fullscreen error:", err));
+      }
+
+      alert("Special Exam Submitted Successfully!");
       navigate("/result", { state: res.data });
     } catch (err) {
       alert(err.response?.data?.message || "Submission failed");
       hasSubmitted.current = false;
       setSubmitted(false);
     }
-  }, [answers, user?._id, subject, navigate]);
+  }, [answers, user?.email, testId, navigate]);
 
   // ==========================
   // Violation Handler
@@ -181,13 +193,11 @@ export default function Exam() {
     }));
   };
 
-
   const getExamTime = () => {
-    const count = questions.length;
-    return count > 5 ? 60 + (count - 5) * 10 : 60;
+    return testDetails?.durationMinutes ? testDetails.durationMinutes * 60 : 1800; // default 30 mins
   };
 
-  if (loading) return <p>Loading questions...</p>;
+  if (loading) return <p>Loading special exam questions...</p>;
   if (loadingError) return <p style={{ color: "red" }}>{loadingError}</p>;
 
   if (!examStarted) {
@@ -208,9 +218,9 @@ export default function Exam() {
           boxShadow: "0 4px 15px rgba(0, 0, 0, 0.05)",
           textAlign: "center"
         }}>
-          <h2 style={{ color: "#111827", margin: "0 0 15px 0" }}>{subject} Exam</h2>
+          <h2 style={{ color: "#111827", margin: "0 0 15px 0" }}>{testDetails?.name || "Special Exam"}</h2>
           <p style={{ color: "#4b5563", fontSize: "15px", lineHeight: "1.5", marginBottom: "20px" }}>
-            This exam is conducted under strict fullscreen rules to ensure academic integrity. Please read the instructions below before starting:
+            This special exam is conducted under strict fullscreen rules to ensure academic integrity. Please read the instructions below before starting:
           </p>
           <div style={{
             backgroundColor: "#f9fafb",
@@ -235,6 +245,7 @@ export default function Exam() {
           <button
             onClick={() => {
               enterFullscreen();
+              startTimeRef.current = Date.now();
               setExamStarted(true);
             }}
             style={{
@@ -249,7 +260,7 @@ export default function Exam() {
               width: "100%"
             }}
           >
-            I Agree, Enter Fullscreen & Start Exam
+            I Agree, Enter Fullscreen & Start Special Exam
           </button>
         </div>
       </div>
@@ -260,12 +271,12 @@ export default function Exam() {
     <div style={{ padding: "20px" }}>
       {examStarted && <Timer time={getExamTime()} submit={submit} />}
 
-      <h2>{subject} Exam</h2>
+      <h2>{testDetails?.name} Special Exam</h2>
 
       {/* Question Navigator */}
       <div style={{ marginBottom: "20px" }}>
         {questions.map((q, index) => {
-          const key = q._id.toString();
+          const key = q._id ? q._id.toString() : index.toString();
           const answered = answers[key];
 
           return (
@@ -295,7 +306,7 @@ export default function Exam() {
 
       {/* Questions */}
       {questions.map((q, index) => {
-        const key = q._id.toString();
+        const key = q._id ? q._id.toString() : index.toString();
 
         return (
           <div
@@ -358,7 +369,7 @@ export default function Exam() {
           cursor: submitted ? "not-allowed" : "pointer",
         }}
       >
-        {submitted ? "Submitting..." : "Submit Exam"}
+        {submitted ? "Submitting..." : "Submit Special Exam"}
       </button>
 
       <p style={{ marginTop: "15px", color: "red" }}>
